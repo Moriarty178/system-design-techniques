@@ -10,15 +10,31 @@ public class ConsistentHashingApplication {
 		SpringApplication.run(ConsistentHashingApplication.class, args);
 
 		ConsistentHashing ch = new ConsistentHashing();
-		ch.addServer("Server-A");
-		ch.addServer("Server-B");
-		ch.addServer("Server-C");
+		ch.addServer("ServerA");
+		ch.addServer("ServerB");
 
 		String[] keys = {"user_1", "user_2", "order_55", "product_99"};
 		for (String key : keys) {
-			String server = ch.getServer(key);
-			System.out.println("Key [" + key + "] is assigned to " + server);
+			ch.putKey(key);
+			System.out.println("Key '" + key + "' is assigned to " + ch.getServer(key));
 		}
+
+		System.out.println("Danh sách keys lúc đầu trước khi add/remove ServerC:");
+		ch.getAllKeys();
+
+		// Thêm serverC và gọi remap để ánh xạ lại nếu có thay đổi
+		ch.addServer("ServerC");
+		ch.remapKeys();
+		System.out.println("Danh sách keys sau khi add ServerC:");
+		ch.getAllKeys();
+
+		// Remove ServerB và remap
+		ch.removeServer("ServerA");
+		ch.removeServer("ServerC");
+		ch.remapKeys();
+		System.out.println("Danh sách keys sau khi remove ServerA & ServerC:");
+		ch.getAllKeys();
+
 	}
 
 }

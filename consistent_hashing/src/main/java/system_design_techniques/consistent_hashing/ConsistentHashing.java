@@ -2,17 +2,17 @@ package system_design_techniques.consistent_hashing;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ConsistentHashing {
     private final SortedMap<Integer, String> circle = new TreeMap<>();
+    private final Map<String, String> keyToServer = new HashMap<>(); // tracking key -> server: lưu server mà key đang aánh xạ đến
     /*
     * để tránh tình trạng phân bổ không đồng đều key giữa các server với nhau, ta dùng node ảo để tăng độ phụ sóng cho mỗi server qua đó giảm thiểu tình trạng phân bổ "key" không đồng đều
     * */
-    private final int VIRTUAL_NODES = 100;
+    private final int VIRTUAL_NODES = 3;
 
-
+    // Thêm server + virtual nodes
     public void addServer(String server) {
         for (int i = 0; i < VIRTUAL_NODES; i++) {
             int hash = hash(server + "#" + i);
@@ -20,6 +20,7 @@ public class ConsistentHashing {
         }
     }
 
+    // Xóa server khỏi vòng
     public void removeServer(String server) {
         for (int i = 0; i < VIRTUAL_NODES; i++) {
             int hash = hash(server + "#" + i);
@@ -43,6 +44,21 @@ public class ConsistentHashing {
         return circle.get(hash);
     }
 
+    // Kiểm tra khi có server được thêm hoặc bớt, nếu key được ánh xạ => lưu lại tracking mới trong keyToServer
+    public void remapKeys() {
+        System.out.println("\n--- Remapping keys after server change ---");
+        for (Map.Entry<String, String> entry : keyToServer.entrySet()) {
+            String key = entry.getKey();
+            String oldServer = entry.getValue();
+            String newServer = getServer(key);
+
+            if (!oldServer.equals(newServer)) {
+                System.out.println("Key [" + key + "] moved from " + oldServer + " -> " + newServer);
+                keyToServer.put(key, newServer);
+            }
+        }
+    }
+
     /*
     * Việc phân bổ các key cho các server phụ thuộc vào hàm hash( ) rất nhiều, và một phần tương đối vào virtual node, không gian vòng
     * */
@@ -57,5 +73,17 @@ public class ConsistentHashing {
             throw new RuntimeException(e);
         }
         //return key.hashCode() & 0x7fffffff; // hash code dương
+    }
+
+    // Lưu ánh xạ key -> server
+    public void putKey(String key) {
+        String server = getServer(key);
+        keyToServer.put(key, server);
+    }
+
+    public void getAllKeys()  {
+        for (Map.Entry<String, String> entry : keyToServer.entrySet()) {
+            System.out.println("[" + entry.getKey() + "->" + entry.getValue() + "]");
+        }
     }
 }
