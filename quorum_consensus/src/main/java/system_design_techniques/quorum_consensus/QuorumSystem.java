@@ -23,9 +23,13 @@ public class QuorumSystem {
         // shuffle replicas: giả lập ghi ngẫu nhiên vào W nodes
         List<ReplicaNode> shuffleReplicas = new ArrayList<>(replicas);
         Collections.shuffle(shuffleReplicas);
-        for (int i = 0; i < W; i++) {
-            shuffleReplicas.get(i).write(value, version);
-            System.out.println(" - Wrote to " + shuffleReplicas.get(i).getName());
+        for (int i = 0; i < shuffleReplicas.size(); i++) { // trong tập hợp nodes, ghi đủ lên W nodes => ghi success
+            if (shuffleReplicas.get(i).write(value, version)) {
+                System.out.println(" - Wrote to " + shuffleReplicas.get(i).getName());
+                W--;
+            }
+
+            if (W == 0) break;
         }
     }
 
