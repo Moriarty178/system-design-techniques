@@ -9,9 +9,15 @@ public class ReplicaNode {
         this.name = name;
     }
 
-    public void write(String value, int version) {
-        this.value = value;
-        this.version = version;
+    public boolean write(String value, int version) {
+        try {
+            this.value = value;
+            this.version = version;
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
     public String read() {
