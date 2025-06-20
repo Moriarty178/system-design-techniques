@@ -17,15 +17,15 @@ public class QuorumSystem {
     }
 
     public void write(String value, int W) {
-//        long timestamp  = System.currentTimeMillis(); // simulate version
+        //long timestamp  = System.currentTimeMillis(); // simulate version
         int version = versionCounter.incrementAndGet();
         System.out.println("Writing '" + value + "' to W=" + W + " replicas");
         // shuffle replicas: giả lập ghi ngẫu nhiên vào W nodes
         List<ReplicaNode> shuffleReplicas = new ArrayList<>(replicas);
         Collections.shuffle(shuffleReplicas);
-        for (int i = 0; i < shuffleReplicas.size(); i++) { // trong tập hợp nodes, ghi đủ lên W nodes => ghi success
-            if (shuffleReplicas.get(i).write(value, version)) {
-                System.out.println(" - Wrote to " + shuffleReplicas.get(i).getName());
+        for (ReplicaNode shuffleReplica : shuffleReplicas) { // trong tập hợp nodes, ghi đủ lên W nodes => ghi success
+            if (shuffleReplica.write(value, version)) {
+                System.out.println(" - Wrote to " + shuffleReplica.getName());
                 W--;
             }
 
